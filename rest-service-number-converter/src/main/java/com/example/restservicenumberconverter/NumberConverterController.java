@@ -11,16 +11,30 @@ public class NumberConverterController {
     private static String answerMessage = "";
     private static String answerVal = "";
     private final AtomicLong counter = new AtomicLong();
+    Integer intToConvert;
 
     @GetMapping("/NumberConversion")
     public NumberConverter numberConverter(@RequestParam(value="mode", defaultValue = "toHex") String mode,
                                            @RequestParam(value="numToConvert", defaultValue = "16") String numToConvert) {
+        try {
+            intToConvert = Integer.valueOf(numToConvert);
+        }catch (NumberFormatException exception){
+            answerMessage = "Wrong input number pass positive int";
+            return new NumberConverter(counter.incrementAndGet(), mode, numToConvert, answerMessage);
+        }
+
+        if(intToConvert <= 0){
+            answerMessage = "Wrong input number pass positive int";
+            return new NumberConverter(counter.incrementAndGet(), mode, numToConvert, answerMessage);
+        }
+
         if (mode.equals("toHex")) {
-            answerVal = Integer.toHexString(Integer.valueOf(numToConvert));
+            answerVal = Integer.toHexString(intToConvert);
         } else if (mode.equals("toRoman")) {
-            answerVal = integerToRoman(Integer.valueOf(numToConvert));
+            answerVal = integerToRoman(intToConvert);
         } else {
-            answerVal = "Wrong input mode";
+            answerMessage = "Wrong input mode";
+            return new NumberConverter(counter.incrementAndGet(), mode, numToConvert, answerMessage);
         }
         answerMessage = "For: " + numToConvert + " and conversion mode: " + mode + " Result is: " + answerVal;
         return new NumberConverter(counter.incrementAndGet(), mode, numToConvert, answerMessage);
